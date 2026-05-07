@@ -1,0 +1,29 @@
+services:
+  ffice-provider-validator-mariadb:
+    image: docker.io/library/mariadb:12-ubi
+    container_name: ffice-provider-validator-mariadb
+    ports:
+      - "3311:3306"
+    environment:
+      MARIADB_DATABASE: swim_ffice_provider_validator
+      MARIADB_USER: swim
+      MARIADB_PASSWORD: swim
+      MARIADB_ROOT_PASSWORD: root
+    volumes:
+      - ffice-provider-validator-mariadb-data:/var/lib/mysql
+    networks:
+      - swim-network
+    healthcheck:
+      test: ["CMD-SHELL", "healthcheck.sh --connect --innodb_initialized"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+volumes:
+  ffice-provider-validator-mariadb-data:
+
+networks:
+  swim-network:
+    name: swim-ffice-provider-validator-network
+    driver: bridge
