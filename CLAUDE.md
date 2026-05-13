@@ -33,30 +33,19 @@ podman compose up -d
 ./mvnw test jacoco:report
 ```
 
-**Container runtime is Podman, not Docker.** Use `podman` for all container commands.
-
 ## Architecture
 
 Hexagonal architecture (ports & adapters) with a single Maven module. Parent POM is `swim-validators` (not in this repo).
 
 ```
-src/main/java/com/github/swim_developer/validator/ffice/provider/
-├── domain/
-│   ├── model/          # FficeMessage, ReceivedMessage, HttpResult (records/POJOs)
-│   └── port/
-│       ├── in/         # Inbound ports (interfaces for use cases)
-│       └── out/        # Outbound ports (repository interfaces)
-├── application/
-│   └── usecase/        # Port implementations: ConformanceTestService, MessageService,
-│                       #   SubscriptionService, FficeMessageExtractor, ConsoleService
+src/main/java/.../validator/ffice/provider/
+├── domain/             # Model records/POJOs and port interfaces (in/out)
+├── application/        # Use case implementations
 └── infrastructure/
-    ├── rest/           # JAX-RS endpoints (ProviderProxyResource, AmqpApiResource,
-    │   │               #   ConformanceTestResource, MessageResource, ApiResource)
-    │   └── dto/        # Response DTOs
-    ├── client/         # Outbound HTTP clients with mTLS (ProviderHttpClient, ConformanceHttpClient)
-    ├── messaging/      # AMQP integration via Vert.x Proton (UserReceiverLifecycle,
-    │                   #   UserConnectionTracker, AmqpSslConfigurator)
-    └── persistence/    # MariaDB/Hibernate persistence (ReceivedMessageRepositoryImpl)
+    ├── rest/           # JAX-RS endpoints and DTOs
+    ├── client/         # Outbound HTTP clients with mTLS
+    ├── messaging/      # AMQP integration via Vert.x Proton
+    └── persistence/    # MariaDB/Hibernate persistence
 ```
 
 ### Key Flows
@@ -75,10 +64,4 @@ src/main/java/com/github/swim_developer/validator/ffice/provider/
 
 ## Code Standards
 
-- **Max 400 lines per Java file.** No inner/nested classes — every class in its own file.
-- **Logging**: `@Slf4j` only. `LoggerFactory.getLogger()` is forbidden.
-- **No AI co-authorship trailers** in commits. A global git hook strips them.
-- **Build always with** `./mvnw clean package -DskipTests` (never `-Dmaven.test.skip=true`).
 - **Integration tests require** `-DskipITs=false` (skipped by default in pom.xml).
-- **Podman only** — Docker daemon is not running on this machine.
-- Deployments to OpenShift/Kubernetes require explicit user confirmation before execution.
